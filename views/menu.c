@@ -39,7 +39,7 @@ static uint32_t back_view_id = VIEW_NONE;
 static LedState state;
 
 /** Convert menu state to led */
-static void update_leds(bool leds) {
+static void update_leds(bool leds, bool refresh_color_name) {
     if(leds) {
         // -- Update led driver --
         LedDriver* led_driver = led_driver_alloc(state.led_count, &gpio_swclk);
@@ -71,9 +71,12 @@ static void update_leds(bool leds) {
     variable_item_set_current_value_text(index_item, furi_string_get_cstr(str));
 
     // Led color
-    // DO NOT UPDATE, keep current state
-    // const char* name = COLORS[state.led_color_index[state.led_index]].name;
-    // variable_item_set_current_value_text(color_item, name);
+    if(refresh_color_name) {
+        const uint8_t value = state.led_color_index[state.led_index];
+        const char* name = COLORS[value].name;
+        variable_item_set_current_value_index(color_item, value);
+        variable_item_set_current_value_text(color_item, name);
+    }
 
     furi_string_free(str);
 }
@@ -86,43 +89,40 @@ static uint32_t menu_previous_callback(void* context) {
 static void count_item_changed_callback(VariableItem* item) {
     uint8_t value = variable_item_get_current_value_index(item);
     state.led_count = value;
-    update_leds(true);
+    state.led_index = 0;
+    update_leds(true, true);
 }
 
 static void index_item_changed_callback(VariableItem* item) {
     uint8_t value = variable_item_get_current_value_index(item);
     state.led_index = value;
-    update_leds(false);
+    update_leds(false, true);
 }
 
 static void color_item_changed_callback(VariableItem* item) {
     uint8_t value = variable_item_get_current_value_index(item);
     state.led_color_index[state.led_index] = value;
-    const char* name = COLORS[value].name;
-    variable_item_set_current_value_text(color_item, name);
-
-    update_leds(true);
+    update_leds(true, true);
 }
 
 static void menu_enter_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
     case 0: { // LED count
-        uint8_t value = variable_item_get_current_value_index(count_item);
-        state.led_count = value;
-        update_leds(true);
+        // Do nothing
         break;
     }
     case 1: { // LED index
-        uint8_t value = variable_item_get_current_value_index(index_item);
-        state.led_index = value;
+        // Get back to index 0
+        state.led_index = 0;
+        update_leds(false, true);
         break;
     }
     case 2: { // LED color
         uint8_t value = variable_item_get_current_value_index(color_item);
         state.led_color_index[state.led_index] = value;
         state.led_index = (state.led_index + 1) % state.led_count;
-        update_leds(true);
+        update_leds(true, false);
         break;
     }
     case 3: { // About
@@ -174,7 +174,7 @@ void menu_alloc(App* app, uint32_t my_back_view_id) {
     variable_item_list_set_enter_callback(item_list, &menu_enter_callback, app);
 
     // -- Update leds & menu --
-    update_leds(true);
+    update_leds(true, true);
 }
 
 /** Free main view */
