@@ -17,11 +17,14 @@ void about_alloc(ViewDispatcher* view_dispatcher, uint32_t my_back_view_id) {
 
     // -- Create the text box --
     text_box = text_box_alloc();
-    text_box_set_font(text_box, TextBoxFontHex);
+    text_box_set_font(text_box, TextBoxFontText);
     text_box_set_focus(text_box, TextBoxFocusStart);
     text_box_set_text(
         text_box,
-        "A very long text describing the goal of the application...\nThis is natural for it to be very long.\n\n\n\n\n\n\n\nThis is secret, only visible if you scroll long enough.");
+        "WS2812 Led tester\n"
+        "Use SWC pin for DIN.\n\n"
+        "http://github.com/ItHasU\n"
+        "Inspired by work from Derek Jamison");
 
     View* view = text_box_get_view(text_box);
     view_set_previous_callback(view, &about_previous_callback);

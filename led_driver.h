@@ -1,6 +1,7 @@
+#pragma once
+
 #include <furi.h>
 #include <furi_hal.h>
-
 /** LED Driver from https://github.com/jamisonderek/flipper-zero-tutorials */
 
 #define MAX_LED_COUNT 512
